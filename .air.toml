@@ -1,0 +1,5 @@
+[build]
+cmd = "make build"
+bin = "_output/mblog"
+full_bin = "APP_ENV=dev APP_USER=air ./_output/mblog"
+args_bin = ["-c", "configs/mblog.yaml"]
