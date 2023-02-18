@@ -6,7 +6,6 @@
 package mblog
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,9 +37,9 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(replacer)
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.Errorw("Failed to read viper config file", "err", err)
 	}
-	fmt.Fprintln(os.Stdout, "Using config file:", viper.ConfigFileUsed())
+	log.Infow("Using config file", "file", viper.ConfigFileUsed())
 }
 
 func logOptions() *log.Options {
