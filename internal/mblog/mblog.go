@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -22,6 +23,8 @@ func NewMBlogCommand() *cobra.Command {
 		Long:         "",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Init(logOptions())
+			defer log.Sync()
 			return run()
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -41,7 +44,7 @@ func NewMBlogCommand() *cobra.Command {
 
 func run() error {
 	settings, _ := json.Marshal(viper.AllSettings())
-	fmt.Println(string(settings))
-	fmt.Println("Hello MBlog")
+	log.Infow(string(settings))
+	log.Infow(viper.GetString("db.username"))
 	return nil
 }

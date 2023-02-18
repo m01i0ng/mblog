@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -40,4 +41,14 @@ func initConfig() {
 		fmt.Fprintln(os.Stderr, err)
 	}
 	fmt.Fprintln(os.Stdout, "Using config file:", viper.ConfigFileUsed())
+}
+
+func logOptions() *log.Options {
+	return &log.Options{
+		DisableCaller:     viper.GetBool("log.disable-caller"),
+		DisableStacktrace: viper.GetBool("log.disable-stacktrace"),
+		Level:             viper.GetString("log.level"),
+		Format:            viper.GetString("log.format"),
+		OutputPaths:       viper.GetStringSlice("log.output-paths"),
+	}
 }
