@@ -6,9 +6,13 @@
 package mblog
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
@@ -16,6 +20,7 @@ import (
 	"github.com/m01i0ng/mblog/pkg/version/verflag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/sys/unix"
 )
 
 var cfgFile string
@@ -75,8 +80,26 @@ func run() error {
 	}
 	log.Infow("Start to listening the incoming requests on http address", "addr", viper.GetString("addr"))
 
-	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalw(err.Error())
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalw(err.Error())
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, unix.SIGINT, unix.SIGTERM)
+	<-quit
+	log.Infow("Shutting down server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Errorw("Insecure Server forced to shutdown", "err", err)
+		return err
 	}
+
+	log.Infow("Server exiting")
+
 	return nil
 }
