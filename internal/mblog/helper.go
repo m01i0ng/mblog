@@ -10,14 +10,16 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/m01i0ng/mblog/internal/mblog/store"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
+	"github.com/m01i0ng/mblog/pkg/db"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 const (
-	recommendedHomeDir = ".mblog"
-	defaultConfigName  = "mblog.yaml"
+	recommendedHomeDir = ".mblog.sql"
+	defaultConfigName  = "mblog.sql.yaml"
 )
 
 func initConfig() {
@@ -50,4 +52,27 @@ func logOptions() *log.Options {
 		Format:            viper.GetString("log.format"),
 		OutputPaths:       viper.GetStringSlice("log.output-paths"),
 	}
+}
+
+func initStore() error {
+	opts := &db.MySQLOptions{
+		Host:                  viper.GetString("db.host"),
+		Port:                  viper.GetInt("db.port"),
+		Username:              viper.GetString("db.username"),
+		Password:              viper.GetString("db.password"),
+		Database:              viper.GetString("db.database"),
+		MaxIdleConnections:    viper.GetInt("db.max-idle-connections"),
+		MaxOpenConnections:    viper.GetInt("db.max-open-connections"),
+		MaxConnectionLifeTime: viper.GetDuration("db.max-connection-life-time"),
+		LogLevel:              viper.GetInt("db.log-level"),
+	}
+
+	newMySQL, err := db.NewMySQL(opts)
+	if err != nil {
+		return err
+	}
+
+	_ = store.NewStore(newMySQL)
+
+	return nil
 }

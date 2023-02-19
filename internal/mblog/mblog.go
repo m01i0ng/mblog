@@ -29,7 +29,7 @@ var cfgFile string
 
 func NewMBlogCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:          "mblog",
+		Use:          "mblog.sql",
 		Short:        "A good Go project",
 		Long:         "",
 		SilenceUsage: true,
@@ -56,6 +56,10 @@ func NewMBlogCommand() *cobra.Command {
 }
 
 func run() error {
+	if err := initStore(); err != nil {
+		return err
+	}
+
 	gin.SetMode(viper.GetString("runmode"))
 
 	g := gin.New()
