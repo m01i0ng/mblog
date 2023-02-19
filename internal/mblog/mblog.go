@@ -15,6 +15,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/m01i0ng/mblog/internal/pkg/core"
+	"github.com/m01i0ng/mblog/internal/pkg/errno"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/m01i0ng/mblog/internal/pkg/middleware"
 	"github.com/m01i0ng/mblog/pkg/version/verflag"
@@ -62,10 +64,7 @@ func run() error {
 	g.Use(mws...)
 
 	g.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    10003,
-			"message": "Page not found",
-		})
+		core.WriteResponse(c, errno.ErrPageNotFound, nil)
 	})
 	g.GET("/healthz", func(c *gin.Context) {
 		log.C(c).Infow("Healthz function called.")
