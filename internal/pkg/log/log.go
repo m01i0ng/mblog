@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var _ Logger = &ZapLogger{}
+var _ Logger = &zpLogger{}
 
 var (
 	mu  sync.Mutex
@@ -30,7 +30,7 @@ type Logger interface {
 	Sync()
 }
 
-type ZapLogger struct {
+type zpLogger struct {
 	z *zap.Logger
 }
 
@@ -40,7 +40,7 @@ func Init(opts *Options) {
 	std = NewLogger(opts)
 }
 
-func NewLogger(opts *Options) *ZapLogger {
+func NewLogger(opts *Options) *zpLogger {
 	if opts == nil {
 		opts = NewOptions()
 	}
@@ -72,7 +72,7 @@ func NewLogger(opts *Options) *ZapLogger {
 	if err != nil {
 		panic(err)
 	}
-	logger := &ZapLogger{z: z}
+	logger := &zpLogger{z: z}
 	zap.RedirectStdLog(z)
 	return logger
 }
@@ -81,7 +81,7 @@ func Debugw(msg string, keysAndValues ...interface{}) {
 	std.z.Sugar().Debugw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Debugw(msg string, keysAndValues ...interface{}) {
+func (l *zpLogger) Debugw(msg string, keysAndValues ...interface{}) {
 	l.z.Sugar().Debugw(msg, keysAndValues...)
 }
 
@@ -89,7 +89,7 @@ func Infow(msg string, keysAndValues ...interface{}) {
 	std.z.Sugar().Infow(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Infow(msg string, keysAndValues ...interface{}) {
+func (l *zpLogger) Infow(msg string, keysAndValues ...interface{}) {
 	l.z.Sugar().Infow(msg, keysAndValues...)
 }
 
@@ -97,7 +97,7 @@ func Warnw(msg string, keysAndValues ...interface{}) {
 	std.z.Sugar().Warnw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Warnw(msg string, keysAndValues ...interface{}) {
+func (l *zpLogger) Warnw(msg string, keysAndValues ...interface{}) {
 	l.z.Sugar().Warnw(msg, keysAndValues...)
 }
 
@@ -105,7 +105,7 @@ func Errorw(msg string, keysAndValues ...interface{}) {
 	std.z.Sugar().Errorw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Errorw(msg string, keysAndValues ...interface{}) {
+func (l *zpLogger) Errorw(msg string, keysAndValues ...interface{}) {
 	l.z.Sugar().Errorw(msg, keysAndValues...)
 }
 
@@ -113,7 +113,7 @@ func Panicw(msg string, keysAndValues ...interface{}) {
 	std.z.Sugar().Panicw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Panicw(msg string, keysAndValues ...interface{}) {
+func (l *zpLogger) Panicw(msg string, keysAndValues ...interface{}) {
 	l.z.Sugar().Panicw(msg, keysAndValues...)
 }
 
@@ -121,7 +121,7 @@ func Fatalw(msg string, keysAndValues ...interface{}) {
 	std.z.Sugar().Fatalw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Fatalw(msg string, keysAndValues ...interface{}) {
+func (l *zpLogger) Fatalw(msg string, keysAndValues ...interface{}) {
 	l.z.Sugar().Fatalw(msg, keysAndValues...)
 }
 
@@ -129,6 +129,6 @@ func Sync() {
 	std.z.Sync()
 }
 
-func (l *ZapLogger) Sync() {
+func (l *zpLogger) Sync() {
 	_ = l.z.Sync()
 }
