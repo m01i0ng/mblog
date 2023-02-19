@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/m01i0ng/mblog/internal/pkg/log"
+	"github.com/m01i0ng/mblog/pkg/version/verflag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -25,6 +26,7 @@ func NewMBlogCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Init(logOptions())
 			defer log.Sync()
+			verflag.PrintAndExitIfRequested()
 			return run()
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -39,6 +41,7 @@ func NewMBlogCommand() *cobra.Command {
 	cobra.OnInitialize(initConfig)
 	cmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "The path to the config file. Empty string for no config file.")
 	cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	verflag.AddFlags(cmd.PersistentFlags())
 	return cmd
 }
 
