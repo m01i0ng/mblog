@@ -6,10 +6,13 @@
 package mblog
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
+	"github.com/m01i0ng/mblog/internal/pkg/middleware"
 	"github.com/m01i0ng/mblog/pkg/version/verflag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,8 +49,34 @@ func NewMBlogCommand() *cobra.Command {
 }
 
 func run() error {
-	settings, _ := json.Marshal(viper.AllSettings())
-	log.Infow(string(settings))
-	log.Infow(viper.GetString("db.username"))
+	gin.SetMode(viper.GetString("runmode"))
+
+	g := gin.New()
+
+	mws := []gin.HandlerFunc{gin.Recovery(), middleware.NoCache, middleware.Cors, middleware.Secure, middleware.RequestID()}
+	g.Use(mws...)
+
+	g.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    10003,
+			"message": "Page not found",
+		})
+	})
+	g.GET("/healthz", func(c *gin.Context) {
+		log.C(c).Infow("Healthz function called.")
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+		})
+	})
+
+	srv := &http.Server{
+		Addr:    viper.GetString("addr"),
+		Handler: g,
+	}
+	log.Infow("Start to listening the incoming requests on http address", "addr", viper.GetString("addr"))
+
+	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Fatalw(err.Error())
+	}
 	return nil
 }

@@ -20,3 +20,4 @@ log:
   output-paths:
     - /tmp/mblog.log
     - stdout
+addr: :8080
