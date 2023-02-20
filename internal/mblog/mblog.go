@@ -15,8 +15,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/m01i0ng/mblog/internal/pkg/core"
-	"github.com/m01i0ng/mblog/internal/pkg/errno"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/m01i0ng/mblog/internal/pkg/middleware"
 	"github.com/m01i0ng/mblog/pkg/version/verflag"
@@ -67,29 +65,23 @@ func run() error {
 	mws := []gin.HandlerFunc{gin.Recovery(), middleware.NoCache, middleware.Cors, middleware.Secure, middleware.RequestID()}
 	g.Use(mws...)
 
-	g.NoRoute(func(c *gin.Context) {
-		core.WriteResponse(c, errno.ErrPageNotFound, nil)
-	})
-	g.GET("/healthz", func(c *gin.Context) {
-		log.C(c).Infow("Healthz function called.")
-		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
-		})
-	})
+	if err := installRouters(g); err != nil {
+		return err
+	}
 
-	srv := &http.Server{
+	httpSrv := &http.Server{
 		Addr:    viper.GetString("addr"),
 		Handler: g,
 	}
 	log.Infow("Start to listening the incoming requests on http address", "addr", viper.GetString("addr"))
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalw(err.Error())
 		}
 	}()
 
-	quit := make(chan os.Signal, 1)
+	quit := make(chan os.Signal)
 	signal.Notify(quit, unix.SIGINT, unix.SIGTERM)
 	<-quit
 	log.Infow("Shutting down server ...")
@@ -97,7 +89,7 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := httpSrv.Shutdown(ctx); err != nil {
 		log.Errorw("Insecure Server forced to shutdown", "err", err)
 		return err
 	}

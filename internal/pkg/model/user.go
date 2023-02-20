@@ -5,7 +5,12 @@
 
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/m01i0ng/mblog/pkg/auth"
+	"gorm.io/gorm"
+)
 
 type UserM struct {
 	CreatedAt time.Time `gorm:"column:createdAt"`      //
@@ -21,4 +26,14 @@ type UserM struct {
 // TableName sets the insert table name for this struct type
 func (n *UserM) TableName() string {
 	return "user"
+}
+
+// BeforeCreate 在创建数据库记录之前加密明文密码
+func (n *UserM) BeforeCreate(tx *gorm.DB) (err error) {
+	n.Password, err = auth.Encrypt(n.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
