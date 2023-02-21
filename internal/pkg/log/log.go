@@ -142,8 +142,14 @@ func C(ctx context.Context) *zapLogger {
 func (l *zapLogger) C(ctx context.Context) *zapLogger {
 	lc := l.clone()
 
+	// log 中添加 requestID
 	if requestID := ctx.Value(known.XRequestIDKey); requestID != nil {
 		lc.z = lc.z.With(zap.Any(known.XRequestIDKey, requestID))
+	}
+
+	// log 中添加 userID
+	if userID := ctx.Value(known.XUsernameKey); userID != nil {
+		lc.z = lc.z.With(zap.Any(known.XUsernameKey, userID))
 	}
 
 	return lc

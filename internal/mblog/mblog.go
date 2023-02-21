@@ -15,8 +15,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/m01i0ng/mblog/internal/pkg/known"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/m01i0ng/mblog/internal/pkg/middleware"
+	"github.com/m01i0ng/mblog/pkg/token"
 	"github.com/m01i0ng/mblog/pkg/version/verflag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -68,6 +70,8 @@ func run() error {
 	if err := installRouters(g); err != nil {
 		return err
 	}
+
+	token.Init(viper.GetString("jwt-secret"), known.XUsernameKey)
 
 	httpSrv := &http.Server{
 		Addr:    viper.GetString("addr"),
