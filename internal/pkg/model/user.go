@@ -8,6 +8,7 @@ package model
 import (
 	"time"
 
+	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/m01i0ng/mblog/pkg/auth"
 	"gorm.io/gorm"
 )
@@ -31,6 +32,7 @@ func (n *UserM) TableName() string {
 // BeforeCreate 在创建数据库记录之前加密明文密码
 func (n *UserM) BeforeCreate(tx *gorm.DB) (err error) {
 	n.Password, err = auth.Encrypt(n.Password)
+	log.Infow("New user", n)
 	if err != nil {
 		return err
 	}

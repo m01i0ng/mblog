@@ -17,11 +17,16 @@ var (
 )
 
 type IStore interface {
+	DB() *gorm.DB
 	Users() UserStore
 }
 
 type datastore struct {
 	db *gorm.DB
+}
+
+func (d *datastore) DB() *gorm.DB {
+	return d.db
 }
 
 func NewStore(db *gorm.DB) *datastore {

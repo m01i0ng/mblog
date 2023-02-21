@@ -8,6 +8,7 @@ import (
 	"github.com/m01i0ng/mblog/internal/pkg/errno"
 	"github.com/m01i0ng/mblog/internal/pkg/log"
 	"github.com/m01i0ng/mblog/internal/pkg/middleware"
+	"github.com/m01i0ng/mblog/pkg/auth"
 )
 
 func installRouters(g *gin.Engine) error {
@@ -20,9 +21,14 @@ func installRouters(g *gin.Engine) error {
 		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
 	})
 
-	uc := user.New(store.S)
+	authz, err := auth.NewAuthz(store.S.DB())
+	if err != nil {
+		return err
+	}
 
-	g.POST("/login")
+	uc := user.New(store.S, authz)
+
+	g.POST("/login", uc.Login)
 
 	v1 := g.Group("/v1")
 
@@ -31,7 +37,8 @@ func installRouters(g *gin.Engine) error {
 		{
 			userV1.POST("", uc.Create)
 			userV1.PUT(":name/change-password", uc.ChangePassword)
-			userV1.Use(middleware.Authn())
+			userV1.Use(middleware.Authn(), middleware.Authz(authz))
+			userV1.GET(":name", uc.Get)
 		}
 	}
 
