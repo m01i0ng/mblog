@@ -14,12 +14,9 @@ import (
 	v1 "github.com/m01i0ng/mblog/pkg/api/mblog/v1"
 )
 
-const defaultMethods = "(GET)|(POST)|(PUT)|(DELETE)"
-
-func (uc *UserController) Create(c *gin.Context) {
-	log.C(c).Infow("Create func called")
-
-	var r v1.CreateUserRequest
+func (uc *UserController) Update(c *gin.Context) {
+	log.C(c).Infow("")
+	var r v1.UpdateUserRequest
 	if err := c.ShouldBindJSON(&r); err != nil {
 		core.WriteResponse(c, errno.ErrBind, nil)
 		return
@@ -30,12 +27,7 @@ func (uc *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	if err := uc.b.Users().Create(c, &r); err != nil {
-		core.WriteResponse(c, err, nil)
-		return
-	}
-
-	if _, err := uc.a.AddNamedPolicy("p", r.Username, "/v1/users/"+r.Username, defaultMethods); err != nil {
+	if err := uc.b.Users().Update(c, c.Param("name"), &r); err != nil {
 		core.WriteResponse(c, err, nil)
 		return
 	}

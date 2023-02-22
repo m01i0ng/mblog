@@ -22,3 +22,10 @@ log:
     - /tmp/mblog.log
     - stdout
 addr: :8080
+grpc:
+  addr: :9090
+runmode: debug
+tls:
+  addr:
+  cert:
+  key:

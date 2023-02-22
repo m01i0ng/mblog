@@ -21,6 +21,8 @@ GO_LDFLAGS += \
   -X $(VERSION_PACKAGE).GitTreeState=$(GIT_TREE_STATE) \
   -X $(VERSION_PACKAGE).BuildDate=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 
+APIROOT=$(ROOT_DIR)/pkg/proto
+
 .PHONY: all
 all: add-copyright format build
 
@@ -47,3 +49,12 @@ tidy:
 .PHONY: clean
 clean:
 	@-rm -vrf $(OUTPUT_DIR)
+
+protoc:
+	@echo "======> Generate protobuf files"
+	@protoc \
+		--proto_path=$(APIROOT) \
+		--proto_path=$(ROOT_DIR)/third_party \
+		--go_out=paths=source_relative:$(APIROOT) \
+		--go-grpc_out=paths=source_relative:$(APIROOT) \
+		$(shell find $(APIROOT) -type f -name "*.proto")

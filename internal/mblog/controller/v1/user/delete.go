@@ -11,14 +11,19 @@ import (
 	"github.com/m01i0ng/mblog/internal/pkg/log"
 )
 
-func (uc *UserController) Get(c *gin.Context) {
-	log.C(c).Infow("Get user func called")
+func (uc *UserController) Delete(c *gin.Context) {
+	log.C(c).Infow("Delete user func called")
+	username := c.Param("name")
 
-	user, err := uc.b.Users().Get(c, c.Param("name"))
-	if err != nil {
+	if err := uc.b.Users().Delete(c, username); err != nil {
 		core.WriteResponse(c, err, nil)
 		return
 	}
 
-	core.WriteResponse(c, nil, user)
+	if _, err := uc.a.RemoveNamedPolicy("p", username, "", ""); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, nil)
 }
