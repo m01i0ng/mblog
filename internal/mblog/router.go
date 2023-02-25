@@ -6,7 +6,9 @@
 package mblog
 
 import (
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/m01i0ng/mblog/internal/mblog/controller/v1/post"
 	"github.com/m01i0ng/mblog/internal/mblog/controller/v1/user"
 	"github.com/m01i0ng/mblog/internal/mblog/store"
 	"github.com/m01i0ng/mblog/internal/pkg/core"
@@ -26,12 +28,15 @@ func installRouters(g *gin.Engine) error {
 		core.WriteResponse(c, nil, map[string]string{"status": "ok"})
 	})
 
+	pprof.Register(g)
+
 	authz, err := auth.NewAuthz(store.S.DB())
 	if err != nil {
 		return err
 	}
 
 	uc := user.New(store.S, authz)
+	pc := post.New(store.S)
 
 	g.POST("/login", uc.Login)
 
@@ -44,6 +49,19 @@ func installRouters(g *gin.Engine) error {
 			userV1.PUT(":name/change-password", uc.ChangePassword)
 			userV1.Use(middleware.Authn(), middleware.Authz(authz))
 			userV1.GET(":name", uc.Get)
+			userV1.PUT(":name", uc.Update)
+			userV1.GET("", uc.List)
+			userV1.DELETE(":name", uc.Delete)
+		}
+
+		postV1 := v1.Group("/posts", middleware.Authn())
+		{
+			postV1.POST("", pc.Create)
+			postV1.GET(":postID", uc.Get)
+			postV1.PUT(":postID", pc.Update)
+			postV1.DELETE("", pc.DeleteCollection)
+			postV1.GET("", pc.List)
+			postV1.DELETE(":postID", pc.Delete)
 		}
 	}
 

@@ -19,7 +19,6 @@ log:
   level: debug
   format: console
   output-paths:
-    - /tmp/mblog.log
     - stdout
 addr: :8080
 grpc:

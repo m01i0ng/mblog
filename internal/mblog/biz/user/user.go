@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"regexp"
+	"sync"
 
 	"github.com/jinzhu/copier"
 	"github.com/m01i0ng/mblog/internal/mblog/store"
@@ -18,6 +19,7 @@ import (
 	v1 "github.com/m01i0ng/mblog/pkg/api/mblog/v1"
 	"github.com/m01i0ng/mblog/pkg/auth"
 	"github.com/m01i0ng/mblog/pkg/token"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
@@ -31,11 +33,11 @@ type UserBiz interface {
 	Delete(ctx context.Context, username string) error
 }
 
-var _ UserBiz = (*userBiz)(nil)
-
 type userBiz struct {
 	ds store.IStore
 }
+
+var _ UserBiz = (*userBiz)(nil)
 
 func (b *userBiz) List(ctx context.Context, offset, limit int) (*v1.ListUserResponse, error) {
 	count, list, err := b.ds.Users().List(ctx, offset, limit)
@@ -43,9 +45,18 @@ func (b *userBiz) List(ctx context.Context, offset, limit int) (*v1.ListUserResp
 		log.C(ctx).Errorw("Failed to list users from storage", "err", err)
 		return nil, err
 	}
-	users := make([]*v1.UserInfo, 0, len(list))
+
+	var m sync.Map
+	eg, ctx := errgroup.WithContext(ctx)
 	for _, item := range list {
 		user := item
+		eg.Go(func() error {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+			}
+		})
 		users = append(users, &v1.UserInfo{
 			Username:  user.Username,
 			Nickname:  user.Nickname,
