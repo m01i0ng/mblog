@@ -24,7 +24,7 @@ GO_LDFLAGS += \
 APIROOT=$(ROOT_DIR)/pkg/proto
 
 .PHONY: all
-all: add-copyright format build
+all: add-copyright format lint build
 
 .PHONY: build
 build: tidy

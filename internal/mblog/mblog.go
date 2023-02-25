@@ -135,7 +135,7 @@ func run() error {
 	httpSrv := startInsecureServer(g)
 	grpcServer := startGRPCServer()
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, unix.SIGINT, unix.SIGTERM)
 	<-quit
 	log.Infow("Shutting down server ...")
