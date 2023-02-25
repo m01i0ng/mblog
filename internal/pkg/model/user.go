@@ -24,12 +24,12 @@ type UserM struct {
 	Username  string    `gorm:"column:username"`       //
 }
 
-// TableName sets the insert table name for this struct type
+// TableName sets the insert table name for this struct type.
 func (n *UserM) TableName() string {
 	return "user"
 }
 
-// BeforeCreate 在创建数据库记录之前加密明文密码
+// BeforeCreate 在创建数据库记录之前加密明文密码.
 func (n *UserM) BeforeCreate(tx *gorm.DB) (err error) {
 	n.Password, err = auth.Encrypt(n.Password)
 	log.Infow("New user", n)

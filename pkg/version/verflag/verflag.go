@@ -68,7 +68,6 @@ func VersionVar(p *versionValue, name string, value versionValue, usage string) 
 	*p = value
 	pflag.Var(p, name, usage)
 	pflag.Lookup(name).NoOptDefVal = "true"
-
 }
 
 func Version(name string, value versionValue, usage string) *versionValue {

@@ -128,7 +128,7 @@ func (l *zapLogger) Fatalw(msg string, keysAndValues ...interface{}) {
 }
 
 func Sync() {
-	std.z.Sync()
+	_ = std.z.Sync()
 }
 
 func (l *zapLogger) Sync() {

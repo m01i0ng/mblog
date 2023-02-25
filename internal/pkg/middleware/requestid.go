@@ -11,7 +11,7 @@ import (
 	"github.com/m01i0ng/mblog/internal/pkg/known"
 )
 
-// RequestID 是一个 Gin 中间件，在每个 http 请求的 context response 中注入 ID
+// RequestID 是一个 Gin 中间件，在每个 http 请求的 context response 中注入 ID.
 func RequestID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestID := c.Request.Header.Get(known.XRequestIDKey)

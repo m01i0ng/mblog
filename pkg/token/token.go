@@ -46,7 +46,6 @@ func Parse(tokenString, key string) (string, error) {
 
 		return []byte(key), nil
 	})
-
 	if err != nil {
 		return "", err
 	}

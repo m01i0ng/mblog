@@ -58,3 +58,8 @@ protoc:
 		--go_out=paths=source_relative:$(APIROOT) \
 		--go-grpc_out=paths=source_relative:$(APIROOT) \
 		$(shell find $(APIROOT) -type f -name "*.proto")
+
+.PHONY:lint
+lint:
+	@echo "======> Run golangci to lint source codes"
+	@golangci-lint run -c ./.golangci.yaml ./...

@@ -55,16 +55,35 @@ func (b *userBiz) List(ctx context.Context, offset, limit int) (*v1.ListUserResp
 			case <-ctx.Done():
 				return nil
 			default:
+				count, _, err := b.ds.Posts().List(ctx, user.Username, 0, 0)
+				if err != nil {
+					log.C(ctx).Errorw("Failed to list posts", "err", err)
+					return err
+				}
+
+				m.Store(user.ID, &v1.UserInfo{
+					Username:  user.Username,
+					Nickname:  user.Nickname,
+					Email:     user.Email,
+					Phone:     user.Phone,
+					PostCount: count,
+					CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
+					UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
+				})
+				return nil
 			}
 		})
-		users = append(users, &v1.UserInfo{
-			Username:  user.Username,
-			Nickname:  user.Nickname,
-			Email:     user.Email,
-			Phone:     user.Phone,
-			CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
-		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		log.C(ctx).Errorw("Failed to wait all cun calls returned", "err", err)
+		return nil, err
+	}
+
+	users := make([]*v1.UserInfo, 0, len(list))
+	for _, item := range list {
+		user, _ := m.Load(item.ID)
+		users = append(users, user.(*v1.UserInfo))
 	}
 
 	log.C(ctx).Infow("Get users from backend storage", "count", len(users))
@@ -151,8 +170,8 @@ func (b *userBiz) ChangePassword(ctx context.Context, username string, r *v1.Cha
 		return errno.ErrPasswordIncorrect
 	}
 
-	userM.Password, err = auth.Encrypt(r.NewPassword)
-	if err = b.ds.Users().Update(ctx, userM); err != nil {
+	userM.Password, _ = auth.Encrypt(r.NewPassword)
+	if err := b.ds.Users().Update(ctx, userM); err != nil {
 		return err
 	}
 

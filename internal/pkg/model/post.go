@@ -17,7 +17,7 @@ type PostM struct {
 	Username  string    `gorm:"column:username"`       //
 }
 
-// TableName sets the insert table name for this struct type
+// TableName sets the insert table name for this struct type.
 func (p *PostM) TableName() string {
 	return "post"
 }

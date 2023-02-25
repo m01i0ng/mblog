@@ -18,7 +18,7 @@ func (e *Errno) Error() string {
 }
 
 func (e *Errno) SetMessage(format string, args ...interface{}) *Errno {
-	e.Message = fmt.Sprintf(format, args)
+	e.Message = fmt.Sprintf(format, args...)
 	return e
 }
 
@@ -31,7 +31,6 @@ func Decode(err error) (int, string, string) {
 	case *Errno:
 		return typed.HTTP, typed.Code, typed.Message
 	default:
-
 	}
 
 	return InternalServerError.HTTP, InternalServerError.Code, err.Error()
